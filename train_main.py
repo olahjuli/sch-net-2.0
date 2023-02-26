@@ -80,7 +80,7 @@ on_server = True
 save_model_path = "./result/"  # save Pytorch models
 
 cudnn.benchmark = True
-Epoch = 30
+Epoch = 5 
 leaing_rate_base = 3e-4
 
 batch_size = 16
@@ -105,7 +105,7 @@ loss_fun=CrossEntropyLoss()
 opt = torch.optim.Adam(params=net.parameters(), lr=leaing_rate_base)
 
 lr_decay = torch.optim.lr_scheduler.MultiStepLR(opt, [10,20])
-best_pth=5
+best_pth=30
 train_loss=[]
 train_acc=[]
 
