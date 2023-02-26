@@ -231,4 +231,4 @@ for epoch in range(Epoch):
     net.train()
     #mean_loss = sum(mean_loss) / len(mean_loss)
 
-torch.save(net.state_dicts(), f'outputs/model-{datetime.utcnow()}')
+torch.save(net.state_dict(), f'outputs/model-{datetime.utcnow()}')
