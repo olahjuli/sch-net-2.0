@@ -161,11 +161,11 @@ class FreesoundDatasetys(Dataset):
         return len(self.images_lst)
 
     def __getitem__(self, idx):
-        image_file1 = self.images_lst.filename[idx]
-        image_file1=image_file1.replace('\\','/')
-        im1=os.path.basename(image_file1)
+        #image_file1 = self.images_lst.filename[idx]
+        #image_file1=image_file1.replace('\\','/')
+        #im1=os.path.basename(image_file1)
         # print(im1)
-        image_file=os.path.join(r'/mnt/group-ai-medical-2/private/scusenyang/medical1/shared/scusenyang_data/bishe/new/all',im1+'.wav')
+        image_file=self.images_lst.full_path[idx]
         # print(image_file)
         # image_file=image_file+'.wav'
         # print(image_file)

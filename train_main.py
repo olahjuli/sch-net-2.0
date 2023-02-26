@@ -1,3 +1,4 @@
+from datetime import datetime
 import torch
 import os
 import numpy as np
@@ -13,7 +14,7 @@ warnings.filterwarnings("ignore")
 from time import time
 import csv
 import argparse
-
+from tqdm import tqdm
 
 from torch.utils.data import DataLoader
 from src.models.aux_skip_attention import AuxSkipAttention
@@ -63,8 +64,8 @@ mixer = UseMixerWithProb(mixer, prob=MIXER_PROB)
 
 
 
-train_csv = pd.read_csv('./train_fold'+str(1)+'.csv')
-val_csv = pd.read_csv('./val_fold'+str(1)+'.csv')
+train_csv = pd.read_csv('./train.csv')
+val_csv = pd.read_csv('./valid.csv')
 
 train_ds = FreesoundDatasetys(train_csv,
                                    transform=train_transfrom,
@@ -104,7 +105,7 @@ loss_fun=CrossEntropyLoss()
 opt = torch.optim.Adam(params=net.parameters(), lr=leaing_rate_base)
 
 lr_decay = torch.optim.lr_scheduler.MultiStepLR(opt, [10,20])
-best_pth=30
+best_pth=5
 train_loss=[]
 train_acc=[]
 
@@ -163,9 +164,9 @@ def validation(model, optimizer, test_loader,best_pth,isval=True):
 
 
     # show information
-    print('\nTest set ({:d} samples): Average loss: {:.4f}, Accuracy: {:.2f}%\n'.format(len(all_y), test_loss, 1- test_loss))
+    print('\nTest set ({:d} samples): Average loss: {:.4f}, Accuracy: {:.2f}\n'.format(len(all_y), test_loss, acc_sk))
 
-    print([acc_sk,precis,recall,recall,f1])
+    #print([acc_sk,precis,recall,recall,f1])
 
 
 
@@ -191,31 +192,43 @@ for epoch in range(Epoch):
 
     mean_loss = []
 
-    for step, (ct, seg) in enumerate(train_dl):
+    for step, (ct, seg) in tqdm(enumerate(train_dl), total=len(train_dl)):
+        if ct.shape[0] != batch_size:
+            print("skipping incomplete batch")
+            continue
+        #print(f"starting step {step} of epoch {epoch}...")
+        #print(f"ct shape: {ct.shape}")
+        #print(f"seg shape: {seg.shape}")
 
         ct = ct.cuda()
         # print(ct.size())
-        seg=seg.type(torch.LongTensor).cuda()
-
+        seg=seg.type(torch.LongTensor).cuda() 
+        #print(seg)
 
         outputs = net(ct)
-        loss4 = loss_fun(outputs, seg)
-        loss=loss4
+        #print(f"outputs shape: {outputs.shape}")
+        #print(outputs)
+        loss = loss_fun(outputs, seg)
+        #print(f"loss: {loss.item()}")
 
-
-        mean_loss.append(loss4.item())
-
+        #mean_loss.append(loss.item())
+        #print("before zero grad")
         opt.zero_grad()
+        #print("before backward")
         loss.backward()
+        #print("before opt step")
         opt.step()
 
-        if step % 2 is 0:
-            print('epoch:{}, step:{}, loss1:{:.3f}'
-                  .format(epoch, step,  loss.item(), (time() - start) / 60))
+        #if step % 2 == 0:
+        #    print('epoch:{}, step:{}, loss1:{:.3f}'
+        #          .format(epoch, step,  loss.item(), (time() - start) / 60))
+    print("calculating validation accuracy")
     val_acc1 = validation(net, opt, val_dl, best_pth, isval=True)
 
-
-    print(val_acc1)
+    torch.save(net.state_dict(), f'tmp/checkpoint-{epoch}')
+    #print(val_acc1)
 
     net.train()
-    mean_loss = sum(mean_loss) / len(mean_loss)
+    #mean_loss = sum(mean_loss) / len(mean_loss)
+
+torch.save(net.state_dicts(), f'outputs/model-{datetime.utcnow()}')

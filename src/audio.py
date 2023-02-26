@@ -6,7 +6,7 @@ import librosa
 import os
 from src.config import audio as config
 import pandas as pd
-
+from pathlib import Path
 def get_audio_config():
     return config.get_config_dict()
 
@@ -36,7 +36,7 @@ def read_audio(file_path):
 
 
 def audio_to_melspectrogram(audio):
-    spectrogram = librosa.feature.melspectrogram(audio,
+    spectrogram = librosa.feature.melspectrogram(y=audio,
                                                  sr=config.sampling_rate,
                                                  n_mels=config.n_mels,
                                                  hop_length=config.hop_length,
