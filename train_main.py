@@ -80,7 +80,7 @@ on_server = True
 save_model_path = "./result/"  # save Pytorch models
 
 cudnn.benchmark = True
-Epoch = 5 
+Epoch = 40 
 leaing_rate_base = 3e-4
 
 batch_size = 16
@@ -166,7 +166,8 @@ def validation(model, optimizer, test_loader,best_pth,isval=True):
     # show information
     print('\nTest set ({:d} samples): Average loss: {:.4f}, Accuracy: {:.2f}\n'.format(len(all_y), test_loss, acc_sk))
 
-    #print([acc_sk,precis,recall,recall,f1])
+    # print([precis,recall,f1])
+    print(f"Recall: {recall}, precision: {precis}, f1: {f1}")
 
 
 
